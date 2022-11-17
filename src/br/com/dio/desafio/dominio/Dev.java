@@ -1,14 +1,42 @@
 package br.com.dio.desafio.dominio;
 
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class Dev {
-
     private String nome;
-    private Set<Conteudo> conteudosIncritos = new LinkedHashSet<>();
+    private Set<Conteudo> conteudosInscritos = new LinkedHashSet<>();
     private Set<Conteudo> conteudosConcluidos = new LinkedHashSet<>();
+
+    public void inscreverBootcamp(Bootcamp bootcamp){
+        this.conteudosInscritos.addAll(bootcamp.getConteudos());
+        bootcamp.getDevsInscritos().add(this);
+    }
+
+    public void progredir() {
+        Optional<Conteudo> conteudo = this.conteudosInscritos.stream().findFirst();
+        if(conteudo.isPresent()) {
+            this.conteudosConcluidos.add(conteudo.get());
+            this.conteudosInscritos.remove(conteudo.get());
+        } else {
+            System.err.println("Você não está matriculado em nenhum conteúdo!");
+        }
+    }
+
+    public double calcularTotalXp() {
+        Iterator<Conteudo> iterator = this.conteudosConcluidos.iterator();
+        double soma = 0;
+        while(iterator.hasNext()){
+            double next = iterator.next().calcularXp();
+            soma += next;
+        }
+        return soma;
+
+        /*return this.conteudosConcluidos
+                .stream()
+                .mapToDouble(Conteudo::calcularXp)
+                .sum();*/
+    }
+
 
     public String getNome() {
         return nome;
@@ -18,12 +46,12 @@ public class Dev {
         this.nome = nome;
     }
 
-    public Set<Conteudo> getConteudosIncritos() {
-        return conteudosIncritos;
+    public Set<Conteudo> getConteudosInscritos() {
+        return conteudosInscritos;
     }
 
-    public void setConteudosIncritos(Set<Conteudo> conteudosIncritos) {
-        this.conteudosIncritos = conteudosIncritos;
+    public void setConteudosInscritos(Set<Conteudo> conteudosInscritos) {
+        this.conteudosInscritos = conteudosInscritos;
     }
 
     public Set<Conteudo> getConteudosConcluidos() {
@@ -34,33 +62,16 @@ public class Dev {
         this.conteudosConcluidos = conteudosConcluidos;
     }
 
-    public void inscreverBootcamp(BootCamp bootcamp){
-        this.conteudosIncritos.addAll(bootcamp.getConteudos());
-        bootcamp.getDevsIncritos().add(this);
-    };
-    private double calcularTotalXp(){
-        return this.conteudosConcluidos.stream()
-                .mapToDouble(Conteudo::calculoXp)
-                .sum();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Dev dev = (Dev) o;
+        return Objects.equals(nome, dev.nome) && Objects.equals(conteudosInscritos, dev.conteudosInscritos) && Objects.equals(conteudosConcluidos, dev.conteudosConcluidos);
     }
-    public void progredir(){
-        Optional<Conteudo> conteudo = this.conteudosIncritos.stream().findFirst();
-        if(conteudo.isPresent()){
-            this.conteudosConcluidos.add(conteudo.get());
-            this.conteudosIncritos.remove(conteudo.get());
-            System.out.println("Você Progrediu!\nSeu XP até o momento: " + this.calcularTotalXp() + "\n");
-
-        }else{
-            System.out.println("Você não está matriculado em nenhum conteúdo.");
-        }
-    };
 
     @Override
-    public String toString() {
-        return "\nDev{" +
-                "\nnome='" + nome + '\'' +
-                ",\nconteudosIncritos=" + conteudosIncritos +
-                ",\nconteudosConcluidos=" + conteudosConcluidos +
-                '}';
+    public int hashCode() {
+        return Objects.hash(nome, conteudosInscritos, conteudosConcluidos);
     }
 }
